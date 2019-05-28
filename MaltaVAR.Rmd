@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library("fImport")
 library(fOptions)
@@ -58,20 +58,52 @@ library(lmtest)
 library(dlnm)
 ```
 
-##Introduction
-
 
 (a) Produce a time-series plot of your data including the respective ACF and PACF plots.
 ```{r}
-MaltaHPI <- read.csv("~/Desktop/UCLA/Spring19/Econ144/Project2/Project2/MaltaHPI")
-EUGDP <- read.csv("~/Desktop/UCLA/Spring19/Econ144/Project2/Project2/CPMNACSCAB1GQEU28.csv")
+MaltaHPI <- read.csv("MaltaHPI.csv")
+EUGDP <- read.csv("CPMNACSCAB1GQEU28.csv")
 names(MaltaHPI) <- c("Time", "HPI")
 names(EUGDP) <- c("Time", "EUGDP")
+
 #subset data to remove bottom rows
 MaltaHPI <- MaltaHPI[-c(57:60),]
+
 #Convert to numeric
 MaltaHPI <- transform(MaltaHPI, HPI = as.numeric(HPI))
-HPIts <- ts(MaltaHPI$HPI, frequency=4, start=decimal_date(as.Date("2005-01-01")))
-EUGDPts <- ts(EUGDP$EUGDP, frequency=4, start=decimal_date(as.Date("2005-01-01")))
+HPIts <- ts(MaltaHPI$HPI, start=c(2005,1),freq=4)
+EUGDPts <- ts(EUGDP$EUGDP, start=c(2005,1),freq=4)
 ```
+
+<h3>Malta HPI Dataset Analysis</h3>
+
+(a) Plot of time series, ACF, PACF
+
+```{r message=FALSE, warning=FALSE}
+  tsdisplay(HPIts)
+```
+(b) Model fit and discussion
+(c) Residuals vs. Fitted values and discussion
+(d) ACF/PACF analysis for residuals.
+(e) CUSUM interpretation
+(f) Recursive Residual Analysis
+(g) Diagnostic Statistics
+(h) 12-step ahead forecast
+
+
+<h3>EU GDP Analysis</h3>
+(a) Plot of time series, ACF, PACF
+(b) Model fit and discussion
+(c) Residuals vs. Fitted values and discussion
+(d) ACF/PACF analysis for residuals.
+(e) CUSUM interpretation
+(f) Recursive Residual Analysis
+(g) Diagnostic Statistics
+(h) 12-step ahead forecast
+
+<h3> VAR modeling, forecasting, and causality analysis </h3>
+(i) VAR Model and plot discussion
+(j) Impulse Response Interpretation
+(k) Granger Causality Analysis 
+(l) VAR Model 12 step ahead forecast, comparrison with univariate models 
 
