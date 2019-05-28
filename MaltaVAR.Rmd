@@ -73,6 +73,8 @@ MaltaHPI <- MaltaHPI[-c(57:60),]
 MaltaHPI <- transform(MaltaHPI, HPI = as.numeric(HPI))
 HPIts <- ts(MaltaHPI$HPI, start=c(2005,1),freq=4)
 EUGDPts <- ts(EUGDP$EUGDP, start=c(2005,1),freq=4)
+z=cbind(HPIts,EUGDPts)
+VARm=data.frame(z)
 ```
 
 <h3>Malta HPI Dataset Analysis</h3>
@@ -153,7 +155,21 @@ plot(cumsum(mEU2$residuals))
 
 <h3> VAR modeling, forecasting, and causality analysis </h3>
 (i) VAR Model and plot discussion
+```{r,}
+VAR1=VAR(VARm,p=3)
+summary(VAR1)
+```
+
 (j) Impulse Response Interpretation
-(k) Granger Causality Analysis 
+```{r,}
+plot(irf(VAR1, n.ahead=15))
+```
+
+(k) Granger Causality Analysis
+```{r,}
+grangertest(HPIts ~ EUGDPts, order = 8)
+grangertest(EUGDPts ~ HPIts, order = 8)
+```
+
 (l) VAR Model 12 step ahead forecast, comparrison with univariate models 
 
