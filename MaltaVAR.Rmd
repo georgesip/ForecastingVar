@@ -87,16 +87,26 @@ EUGDPts <- ts(EUGDP$EUGDP, start=c(2005,1),freq=4)
 
 (b) Model fit (trend, seasonality, cycle) and discussion
 ```{r,}
-plot(stl(HPIts,s.window = "periodic"),main="STL Decomposition of HPIts")
+stlHPI=stl(HPIts,s.window = "periodic")
+plot(stlHPI,main="STL Decomposition of HPIts")
 q=decompose(HPIts, type = "multiplicative", filter = NULL)
 plot(q)
 ```
 (c) Residuals vs. Fitted values and discussion
 (d) ACF/PACF analysis for residuals.
 ```{r,}
-
+tsdisplay(stlHPI$time.series[,3],main = "TS Display for Remainder of STL Decomposition of HPIts")
+tsdisplay(q$random,main = "TS Display for Remainder of Multiplicative Decomposition of HPIts")
 ```
+
+Multiplicative Decomposition has less significant lags than STL.
+
 (e) CUSUM interpretation
+```{r,}
+plot(cumsum(stlHPI$time.series[,3]))
+plot(cumsum(q$random[3:52]))
+```
+
 (f) Recursive Residual Analysis
 (g) Diagnostic Statistics
 (h) 12-step ahead forecast
