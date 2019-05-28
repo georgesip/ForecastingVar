@@ -162,7 +162,7 @@ summary(VAR1)
 
 (j) Impulse Response Interpretation
 ```{r,}
-plot(irf(VAR1, n.ahead=15))
+plot(irf(VAR1, n.ahead=30))
 ```
 
 (k) Granger Causality Analysis
