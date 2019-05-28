@@ -138,10 +138,15 @@ AIC and BIC both agree that mEU2 is the best model. Hence, we propose an arima(1
 
 (d) ACF/PACF analysis for residuals.
 ```{r}
-
+tsdisplay(mEU2$residuals)
 ```
 
+There are no significant lags in the ACF or PACF which suggest we have chosen a good model.
+
 (e) CUSUM interpretation
+```{r,}
+plot(cumsum(mEU2$residuals))
+```
 (f) Recursive Residual Analysis
 (g) Diagnostic Statistics
 (h) 12-step ahead forecast
