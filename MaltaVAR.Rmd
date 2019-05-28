@@ -82,7 +82,10 @@ EUGDPts <- ts(EUGDP$EUGDP, start=c(2005,1),freq=4)
 ```{r message=FALSE, warning=FALSE}
   tsdisplay(HPIts)
 ```
-(b) Model fit and discussion
+<br> Analysis of the correlograms suggests that the series follows an AR-1 process 
+
+
+(b) Model fit (trend, seasonality, cycle) and discussion
 (c) Residuals vs. Fitted values and discussion
 (d) ACF/PACF analysis for residuals.
 (e) CUSUM interpretation
