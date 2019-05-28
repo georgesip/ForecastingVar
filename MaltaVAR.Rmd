@@ -63,9 +63,15 @@ library(dlnm)
 
 (a) Produce a time-series plot of your data including the respective ACF and PACF plots.
 ```{r}
-MaltaHPI <- read.csv("~/Desktop/UCLA/Spring19/Econ144/Project2/Project2/MaltaHPI", header=FALSE)
-EUGDP <- read.csv("~/Desktop/UCLA/Spring19/Econ144/Project2/Project2/CPMNACSCAB1GQEU28.csv", header=FALSE)
-autoplot(MaltaHPI)+
-  autolayer(EUGDP)
+MaltaHPI <- read.csv("~/Desktop/UCLA/Spring19/Econ144/Project2/Project2/MaltaHPI")
+EUGDP <- read.csv("~/Desktop/UCLA/Spring19/Econ144/Project2/Project2/CPMNACSCAB1GQEU28.csv")
+names(MaltaHPI) <- c("Time", "HPI")
+names(EUGDP) <- c("Time", "EUGDP")
+#subset data to remove bottom rows
+MaltaHPI <- MaltaHPI[-c(57:60),]
+#Convert to numeric
+MaltaHPI <- transform(MaltaHPI, HPI = as.numeric(HPI))
+HPIts <- ts(MaltaHPI$HPI, frequency=4, start=decimal_date(as.Date("2005-01-01")))
+EUGDPts <- ts(EUGDP$EUGDP, frequency=4, start=decimal_date(as.Date("2005-01-01")))
 ```
 
