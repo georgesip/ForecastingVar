@@ -1,0 +1,71 @@
+---
+title: "MaltaVAR"
+author: "Georges Ip" 
+date: "5/28/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library("fImport")
+library(fOptions)
+#library(RQuantLib)
+library(nlstools)
+library(tseries)
+library(Quandl)
+library(zoo)
+library(PerformanceAnalytics)
+library(quantmod)
+library(car)
+library(FinTS)
+library(fOptions)
+library(forecast)
+require(stats)
+library(vars)
+library(tseries, quietly = T)
+library(forecast, quietly = T)
+library(XML)
+library(fBasics)
+library(timsac)
+library(TTR)
+library(lattice)
+library(foreign)
+library(MASS)
+require(stats4)
+library(KernSmooth)
+library(fastICA)
+library(cluster)
+library(leaps)
+library(mgcv)
+library(rpart)
+require("datasets")
+require(graphics)
+library(RColorBrewer)
+library(dynlm)
+library(tidyverse)
+library(readxl)
+library(lubridate)
+library(fpp2)
+library(seasonal)
+library(strucchange)
+library(astsa)
+library(vars)
+library(lmtest)
+library(dlnm)
+```
+
+##Introduction
+
+
+(a) Produce a time-series plot of your data including the respective ACF and PACF plots.
+```{r}
+MaltaHPI <- read.csv("~/Desktop/UCLA/Spring19/Econ144/Project2/Project2/MaltaHPI", header=FALSE)
+EUGDP <- read.csv("~/Desktop/UCLA/Spring19/Econ144/Project2/Project2/CPMNACSCAB1GQEU28.csv", header=FALSE)
+autoplot(MaltaHPI)+
+  autolayer(EUGDP)
+```
+
