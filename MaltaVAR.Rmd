@@ -123,6 +123,8 @@ The plot of the data shows that the mean appears to increase over time, however,
 
 (b) Model fit and discussion
 ```{r}
+stlEUGDP=stl(EUGDPts,s.window = "periodic")
+plot(stlEUGDP,main="STL Decomposition of EUGDPts")
 mEU1 <- Arima(EUGDPts, order = c(1,0,0))
 #alternative models
 mEU2 <- Arima(EUGDPts, order = c(1,1,0))
@@ -135,11 +137,13 @@ AIC and BIC both agree that mEU2 is the best model. Hence, we propose an arima(1
 
 (c) Residuals vs. Fitted values and discussion
 ```{r}
-
+EUresid = resid(mEU2)
+plot(mEU2$fitted, EUresid, xlab = "Fitted Values", ylab = "Residuals")
 ```
 
 (d) ACF/PACF analysis for residuals.
 ```{r}
+checkresiduals(mEU2)
 tsdisplay(mEU2$residuals)
 ```
 
@@ -147,9 +151,17 @@ There are no significant lags in the ACF or PACF which suggest we have chosen a 
 
 (e) CUSUM interpretation
 ```{r,}
-plot(cumsum(mEU2$residuals))
+plot(efp(mEU2$res~1, type = "Rec-CUSUM"))
 ```
+The model seems stable and does not have significant structural breaks.
+
 (f) Recursive Residual Analysis
+```{r}
+y=recresid(mEU2$res~1)
+plot(y, pch=16,ylab="Recursive Residuals")
+```
+The residuals look to be randomly distributed about a mean of 0, however, there seems to be some outliers at an index of around 15.
+
 (g) Diagnostic Statistics
 (h) 12-step ahead forecast
 
