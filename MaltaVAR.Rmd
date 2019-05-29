@@ -73,8 +73,10 @@ MaltaHPI <- MaltaHPI[-c(57:60),]
 MaltaHPI <- transform(MaltaHPI, HPI = as.numeric(HPI))
 HPIts <- ts(MaltaHPI$HPI, start=c(2005,1),freq=4)
 EUGDPts <- ts(EUGDP$EUGDP, start=c(2005,1),freq=4)
-z=cbind(HPIts,EUGDPts)
-VARm=data.frame(z)
+
+#Alternatively, try growth
+gHPIts <- 100*(diff(HPIts, lag = 1)/lag(HPIts, k=-1))
+gEUGDPts <- 100*(diff(EUGDPts, lag = 1)/lag(EUGDPts, k=-1))
 ```
 
 <h3>Malta HPI Dataset Analysis</h3>
@@ -168,8 +170,16 @@ The residuals look to be randomly distributed about a mean of 0, however, there 
 <h3> VAR modeling, forecasting, and causality analysis </h3>
 (i) VAR Model and plot discussion
 ```{r,}
+z=cbind(HPIts,EUGDPts)
+VARm=data.frame(z)
 VAR1=VAR(VARm,p=3)
 summary(VAR1)
+#VAR for growth instead
+w = cbind(gHPIts,gEUGDPts)
+VARm2=data.frame(w)
+VARselect(VARm2, lag.max = 12)
+VAR2=VAR(VARm2,p=11)
+summary(VAR2)
 ```
 
 (j) Impulse Response Interpretation
