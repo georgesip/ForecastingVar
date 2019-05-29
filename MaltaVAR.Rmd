@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r message=FALSE, warning=FALSE}
@@ -60,7 +60,7 @@ library(dlnm)
 
 
 (a) Produce a time-series plot of your data including the respective ACF and PACF plots.
-```{r}
+```{r message=FALSE, warning=FALSE}
 MaltaHPI <- read.csv("MaltaHPI.csv")
 EUGDP <- read.csv("CPMNACSCAB1GQEU28.csv")
 names(MaltaHPI) <- c("Time", "HPI")
@@ -87,18 +87,31 @@ VARm=data.frame(z)
 <br> Analysis of the correlograms suggests that the series follows an AR-1 process 
 
 
-(b) Model fit (trend, seasonality, cycle) and discussion
+(b) Model fit (trend, seasonality, cycle) and discussion 
 ```{r,}
 stlHPI=stl(HPIts,s.window = "periodic")
 plot(stlHPI,main="STL Decomposition of HPIts")
-q=decompose(HPIts, type = "multiplicative", filter = NULL)
-plot(q)
+#q=decompose(HPIts, type = "multiplicative", filter = NULL)
+#plot(q)
+
+#ARMA component 
+m1<-Arima(HPIts,order=c(1,0,0),seasonal = c(1,0,0), include.drift = TRUE)
+plot(HPIts,main="AR1 with SAR1 model with Drift")
+lines(m1$fitted,col='red')
+legend(2006,110,legend=c("Observed","Estimated"),col=c("black","red"))
+Box.test(m1$residuals)
 ```
+The model includes both a seasonal AR-1 and a regular AR-1 component with a drift, which captures the linear component of the data, thereby satisfying the conditions for a model that includes a linear, seasonal, and cyclical component. The residuals satisfy the conditions of a white noise series, suggesting that the model is robust. 
+
 (c) Residuals vs. Fitted values and discussion
+
+```{r message=FALSE, warning=FALSE}
+  plot(m1$fitted,m1$residuals,main="Residuals vs Fitted")
+```
+
 (d) ACF/PACF analysis for residuals.
 ```{r,}
-tsdisplay(stlHPI$time.series[,3],main = "TS Display for Remainder of STL Decomposition of HPIts")
-tsdisplay(q$random,main = "TS Display for Remainder of Multiplicative Decomposition of HPIts")
+tsdisplay(m1$residuals,main="Residual Analysis")
 ```
 
 Multiplicative Decomposition has less significant lags than STL.
