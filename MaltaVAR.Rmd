@@ -1,66 +1,74 @@
 ---
 title: "MaltaVAR"
-author: "Georges Ip" 
+author: "Vincent C.| Aditya G.| Georges I.| Filipp K." 
 date: "5/28/2019"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r message=FALSE, warning=FALSE}
-library(tidyverse)
-library("fImport")
-library(fOptions)
-#library(RQuantLib)
-library(nlstools)
-library(tseries)
-library(Quandl)
-library(zoo)
-library(PerformanceAnalytics)
-library(quantmod)
-library(car)
-library(FinTS)
-library(fOptions)
-library(forecast)
-require(stats)
-library(vars)
-library(tseries, quietly = T)
-library(forecast, quietly = T)
-library(XML)
-library(fBasics)
-library(timsac)
-library(TTR)
-library(lattice)
-library(foreign)
-library(MASS)
-require(stats4)
-library(KernSmooth)
-library(fastICA)
-library(cluster)
-library(leaps)
-library(mgcv)
-library(rpart)
-require("datasets")
-require(graphics)
-library(RColorBrewer)
-library(dynlm)
-library(tidyverse)
-library(readxl)
-library(lubridate)
-library(fpp2)
-library(seasonal)
-library(strucchange)
-library(astsa)
-library(vars)
-library(lmtest)
-library(dlnm)
+doCheck<-function(name){
+  if (!require(name, character.only = TRUE)) {
+        install.packages(name)
+        library(name, character.only = TRUE)
+    }
+}
+#doCheck("tidyverse")
+doCheck("fImport")
+doCheck("fOptions")
+doCheck("nlstools")
+doCheck("tseries")
+doCheck("Quandl")
+doCheck("zoo")
+doCheck("PerformanceAnalytics")
+doCheck("quantmod")
+doCheck("car")
+doCheck("FinTS")
+doCheck("fOptions")
+doCheck("forecast")
+doCheck("stats")
+doCheck("vars")
+doCheck("tseries")
+doCheck("forecast")
+doCheck("XML")
+doCheck("fBasics")
+doCheck("timsac")
+doCheck("TTR")
+doCheck("lattice")
+doCheck("foreign")
+doCheck("MASS")
+doCheck("stats4")
+doCheck("KernSmooth")
+doCheck("fastICA")
+doCheck("cluster")
+doCheck("leaps")
+doCheck("mgcv")
+doCheck("rpart")
+doCheck("datasets")
+doCheck("graphics")
+doCheck("RColorBrewer")
+doCheck("dynlm")
+doCheck("readxl")
+doCheck("lubridate")
+doCheck("fpp2")
+doCheck("seasonal")
+doCheck("strucchange")
+doCheck("astsa")
+doCheck("vars")
+doCheck("lmtest")
+doCheck("dlnm")
 ```
+
+## Introduction
+
+  Historically the European block has excelled in labor and capital mobility. Thus making the acquistion of any EU passport quiet attractive. As a result there has developed a market where non-EU citizens can essentialy purchase a EU-citizenship through investments in small countries like Malta. A coursory search of the internet returns hundreds of agencies with the specific purpose of helping you obtain EU citizenship. In this paper we will investigate the connection between house prices in Malta and the EU GDP. Given that EU GDP increases we would predict that the attractiveness of a EU passport would increase and therefore the housing prices in Malta would also increase.
 
 
 (a) Produce a time-series plot of your data including the respective ACF and PACF plots.
-```{r}
+```{r message=FALSE, warning=FALSE}
 MaltaHPI <- read.csv("MaltaHPI.csv")
 EUGDP <- read.csv("CPMNACSCAB1GQEU28.csv")
 names(MaltaHPI) <- c("Time", "HPI")
@@ -73,6 +81,10 @@ MaltaHPI <- MaltaHPI[-c(57:60),]
 MaltaHPI <- transform(MaltaHPI, HPI = as.numeric(HPI))
 HPIts <- ts(MaltaHPI$HPI, start=c(2005,1),freq=4)
 EUGDPts <- ts(EUGDP$EUGDP, start=c(2005,1),freq=4)
+
+#Alternatively, try growth
+gHPIts <- 100*(diff(HPIts, lag = 1)/lag(HPIts, k=-1))
+gEUGDPts <- 100*(diff(EUGDPts, lag = 1)/lag(EUGDPts, k=-1))
 ```
 
 <h3>Malta HPI Dataset Analysis</h3>
@@ -85,28 +97,147 @@ EUGDPts <- ts(EUGDP$EUGDP, start=c(2005,1),freq=4)
 <br> Analysis of the correlograms suggests that the series follows an AR-1 process 
 
 
-(b) Model fit (trend, seasonality, cycle) and discussion
-(c) Residuals vs. Fitted values and discussion
-(d) ACF/PACF analysis for residuals.
-(e) CUSUM interpretation
-(f) Recursive Residual Analysis
-(g) Diagnostic Statistics
-(h) 12-step ahead forecast
+(b) Model fit (trend, seasonality, cycle) and discussion 
+```{r,}
+stlHPI=stl(HPIts,s.window = "periodic")
+plot(stlHPI,main="STL Decomposition of HPIts")
+#q=decompose(HPIts, type = "multiplicative", filter = NULL)
+#plot(q)
 
+#ARMA component 
+m1<-Arima(HPIts,order=c(1,0,0),seasonal = c(1,0,0), include.drift = TRUE)
+plot(HPIts,main="AR1 with SAR1 model with Drift")
+lines(m1$fitted,col='red')
+legend(2006,110,legend=c("Observed","Estimated"),col=c("black","red"))
+Box.test(m1$residuals)
+```
+The model includes both a seasonal AR-1 and a regular AR-1 component with a drift, which captures the linear component of the data, thereby satisfying the conditions for a model that includes a linear, seasonal, and cyclical component. The residuals satisfy the conditions of a white noise series, suggesting that the model is robust. 
+
+(c) Residuals vs. Fitted values and discussion
+
+```{r message=FALSE, warning=FALSE}
+  plot(m1$fitted,m1$residuals,main="Residuals vs Fitted",xlab="Fitted Values",ylab="Residuals",type="p")
+```
+Analysis shows qualitatively that most of the scattering away from zero tends to occur at smaller values of the HPI near 65-80 and the 90-100 range, stabilizing closer to zero at larger values.
+
+(d) ACF/PACF analysis for residuals.
+```{r,}
+tsdisplay(m1$residuals,main="Residual Analysis")
+```
+
+Despite qualitiative asessment of residuals vs fitted values seeming to gravitate away from zero, the acf and pacf of the residuals demonstrate that the residuals resemble a white noise series, therefore suggesting that the model is robust enough to move forward with.
+
+Multiplicative Decomposition has less significant lags than STL.
+
+(e) CUMSUM interpretation
+```{r,}
+plot(efp(m1$res~1, type = "Rec-CUSUM"))
+```
+Overall, the CUSUM test demonstrates the statistical significant of the model; the recursive cumulative residuals stay within the bounds and don't suggest any long-term trajectory that would create a parameter-breaking scenario.
+
+(f) Recursive Residual Analysis
+
+```{r}
+y=recresid(m1$res~1)
+plot(y, pch=16,ylab="Recursive Residuals")
+```
+
+Although the recursive residuals are scattered considerably around zero with significant spread, no pattern seems to exist that would suggest a breaking of any model parameters.
+
+(g) Diagnostic Statistics
+
+```{r}
+summary(m1)
+```
+
+(h) 12-step ahead forecast
+```{r}
+plot(forecast(m1) , h=12 ,shadecols="oldstyle", main="Malta Housing Price Index ARIMA Forecast",xlab="Year", ylab ="Index")
+```
 
 <h3>EU GDP Analysis</h3>
-(a) Plot of time series, ACF, PACF
+###(a) Plot of time series, ACF, PACF
+```{r}
+tsdisplay(EUGDPts)
+```
+The plot of the data shows that the mean appears to increase over time, however, volatility seems relatively low. The ACF decays relatively quickly to 0, while the PACF only shows a significant spike at a lag of 1. This could be indicative of an AR(1) process.
+
 (b) Model fit and discussion
+```{r}
+stlEUGDP=stl(EUGDPts,s.window = "periodic")
+plot(stlEUGDP,main="STL Decomposition of EUGDPts")
+mEU1 <- Arima(EUGDPts, order = c(1,0,0))
+#alternative models
+mEU2 <- Arima(EUGDPts, order = c(1,1,0))
+mEU3 <- Arima(EUGDPts, order = c(1,1,0), seasonal = c(1,0,0))
+#Look at model selection criteria
+AIC(mEU1,mEU2,mEU3)
+BIC(mEU1,mEU2,mEU3)
+```
+AIC and BIC both agree that mEU2 is the best model. Hence, we propose an arima(1,1,0) model for EUGDP, we eliminate the seasonal component.. 
+
 (c) Residuals vs. Fitted values and discussion
+```{r}
+EUresid = resid(mEU2)
+plot(mEU2$fitted, EUresid, xlab = "Fitted Values", ylab = "Residuals")
+```
+
 (d) ACF/PACF analysis for residuals.
+```{r}
+checkresiduals(mEU2)
+tsdisplay(mEU2$residuals)
+```
+
+There are no significant lags in the ACF or PACF which suggest we have chosen a good model.
+
 (e) CUSUM interpretation
+```{r,}
+plot(efp(mEU2$res~1, type = "Rec-CUSUM"))
+```
+The model seems stable and does not have significant structural breaks.
+
 (f) Recursive Residual Analysis
+```{r}
+y=recresid(mEU2$res~1)
+plot(y, pch=16,ylab="Recursive Residuals")
+```
+The residuals look to be randomly distributed about a mean of 0, however, there seems to be some outliers at an index of around 15.
+
 (g) Diagnostic Statistics
+```{r}
+
+```
+
 (h) 12-step ahead forecast
 
 <h3> VAR modeling, forecasting, and causality analysis </h3>
 (i) VAR Model and plot discussion
-(j) Impulse Response Interpretation
-(k) Granger Causality Analysis 
-(l) VAR Model 12 step ahead forecast, comparrison with univariate models 
+```{r,}
+z=cbind(HPIts,EUGDPts)
+VARm=data.frame(z)
+VAR1=VAR(VARm,p=3)
+summary(VAR1)
+#VAR for growth instead
+w = cbind(gHPIts,gEUGDPts)
+VARm2=data.frame(w)
+VARselect(VARm2, lag.max = 12)
+VAR2=VAR(VARm2,p=11)
+summary(VAR2)
+```
 
+(j) Impulse Response Interpretation
+```{r,}
+plot(irf(VAR1, n.ahead=30))
+```
+
+(k) Granger Causality Analysis
+```{r,}
+#why are we use 8 here? the order should be the the same as that used for the VAR model
+grangertest(HPIts ~ EUGDPts, order = 8)
+grangertest(EUGDPts ~ HPIts, order = 8)
+```
+
+(l) VAR Model 12 step ahead forecast, comparrison with univariate models 
+```{r,}
+plot(predict(VAR1 , n.ahead=12, ci = c(0.80,0.95)), main="Malta Housing Price Index VAR Forecast",xlab="Year", ylab ="Index")
+```
