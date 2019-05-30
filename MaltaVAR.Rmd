@@ -89,7 +89,6 @@ gEUGDPts <- 100*(diff(EUGDPts, lag = 1)/lag(EUGDPts, k=-1))
 <h3>Malta HPI Dataset Analysis</h3>
 
 (a) Plot of time series, ACF, PACF
-
 ```{r message=FALSE, warning=FALSE}
   tsdisplay(HPIts)
  tsdisplay(EUGDPts)
@@ -110,7 +109,7 @@ m1<-Arima(HPIts,order=c(1,0,0),seasonal = c(1,0,0), include.drift = TRUE)
 plot(HPIts,main="AR1 with SAR1 model with Drift")
 lines(m1$fitted,col='red')
 legend(2006,110,legend=c("Observed","Estimated"),col=c("black","red"))
-Box.test(m1$residuals)
+Box.test(m1$residuals,type="Ljung-Box")
 ```
 The model includes both a seasonal AR-1 and a regular AR-1 component with a drift, which captures the linear component of the data, thereby satisfying the conditions for a model that includes a linear, seasonal, and cyclical component. The residuals satisfy the conditions of a white noise series, suggesting that the model is robust.
 
@@ -129,10 +128,10 @@ BIC(mEU1,mEU2,mEU3)
 AIC and BIC both agree that mEU2 is the best model. Hence, we propose an arima(1,1,0) model for EUGDP, we eliminate the seasonal component.
 
 (c) Residuals vs. Fitted values and discussion
-
 ```{r message=FALSE, warning=FALSE}
   plot(m1$fitted,m1$residuals,main="Residuals vs Fitted",xlab="Fitted Values",ylab="Residuals",type="p")
 ```
+
 Analysis shows qualitatively that most of the scattering away from zero tends to occur at smaller values of the HPI near 65-80 and the 90-100 range, stabilizing closer to zero at larger values.
 
 (c) Residuals vs. Fitted values and discussion
@@ -150,7 +149,7 @@ checkresiduals(mEU2)
 tsdisplay(mEU2$residuals)
 ```
 
-Despite qualitiative asessment of residuals vs fitted values seeming to gravitate away from zero, the acf and pacf of the residuals demonstrate that the residuals resemble a white noise series, therefore suggesting that the model is robust enough to move forward with.
+Despite qualitiative asessment of residuals vs fitted values seeming to gravitate away from zero, the acf and pacf of the residuals demonstrate that the residuals resemble a white noise series, therefore suggesting that the model is robust enough to move forward with. The Box-test also concludes with enough evidence to fail to reject H-nought, therefore compounding the claim that the residuals are independently distributed.
 
 Multiplicative Decomposition has less significant lags than STL.
 
@@ -161,6 +160,7 @@ There are no significant lags in the ACF or PACF which suggest we have chosen a 
 plot(efp(m1$res~1, type = "Rec-CUSUM"))
 plot(efp(mEU2$res~1, type = "Rec-CUSUM"))
 ```
+
 Overall, the CUSUM test demonstrates the statistical significant of the model; the recursive cumulative residuals stay within the bounds and don't suggest any long-term trajectory that would create a parameter-breaking scenario.
 
 The EUGDP model seems stable and does not have significant structural breaks.
@@ -176,11 +176,11 @@ plot(y, pch=16,ylab="Recursive Residuals")
 ```
 
 Although the recursive residuals are scattered considerably around zero with significant spread, no pattern seems to exist that would suggest a breaking of any model parameters. 
+The ACF and the PACF suggest that the residuals don't exhibit any serial correlation.
 
 The residuals of EUGDP look to be randomly distributed about a mean of 0, however, there seems to be some outliers at an index of around 15.
 
 (g) Diagnostic Statistics
-
 ```{r}
 summary(m1)
 
@@ -191,10 +191,13 @@ All other salient diagnostics have been analyzed in the previous components of t
 
 (h) 12-step ahead forecast
 ```{r}
-plot(forecast(m1) , h=12 ,shadecols="oldstyle", main="Malta Housing Price Index ARIMA Forecast",xlab="Year", ylab ="Index")
+plot(forecast(m1 , h=12 ) ,shadecols="oldstyle", main="Malta Housing Price Index ARIMA Forecast",xlab="Year", ylab ="Index")
 ```
 
 (h) 12-step ahead forecast
+```{r}
+plot(forecast(mEU2 , h=12 ),shadecols="oldstyle", main="EU GDP ARIMA Forecast",xlab="Year", ylab ="Index")
+```
 
 <h3> VAR modeling, forecasting, and causality analysis </h3>
 (i) VAR Model and plot discussion
