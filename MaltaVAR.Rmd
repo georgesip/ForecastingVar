@@ -142,13 +142,15 @@ y=recresid(m1$res~1)
 plot(y, pch=16,ylab="Recursive Residuals")
 ```
 
-Although the recursive residuals are scattered considerably around zero with significant spread, no pattern seems to exist that would suggest a breaking of any model parameters.
+Although the recursive residuals are scattered considerably around zero with significant spread, no pattern seems to exist that would suggest a breaking of any model parameters. 
 
 (g) Diagnostic Statistics
 
 ```{r}
 summary(m1)
 ```
+
+All other salient diagnostics have been analyzed in the previous components of this project; the remaining salient components are the ME and Sigma^2 as the Arima function does not return significance values for any of the components. The model is overall significant with a small enough sigma squared, largely in line with the residuals behaving as a white noise series. The standard error for each of the components is also considerably small with the exception of the intercept term, which doesn't factor significantly into the robustness of the model.  
 
 (h) 12-step ahead forecast
 ```{r}
