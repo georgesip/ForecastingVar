@@ -58,6 +58,10 @@ library(lmtest)
 library(dlnm)
 ```
 
+## Introduction
+
+  Historically the European block has excelled in labor and capital mobility. Thus making the acquistion of any EU passport quiet attractive. As a result there has developed a market where non-EU citizens can essentialy purchase a EU-citizenship through investments in small countries like Malta. A coursory search of the internet returns hundreds of agencies with the specific purpose of helping you obtain EU citizenship. In this paper we will investigate the connection between house prices in Malta and the EU GDP. Given that EU GDP increases we would predict that the attractiveness of a EU passport would increase and therefore the housing prices in Malta would also increase.
+
 
 (a) Produce a time-series plot of your data including the respective ACF and PACF plots.
 ```{r message=FALSE, warning=FALSE}
