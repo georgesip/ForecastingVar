@@ -111,7 +111,7 @@ m1<-Arima(HPIts,order=c(1,0,0),seasonal = c(1,0,0), include.drift = TRUE)
 plot(HPIts,main="AR1 with SAR1 model with Drift")
 lines(m1$fitted,col='red')
 legend(2006,110,legend=c("Observed","Estimated"),col=c("black","red"))
-Box.test(m1$residuals)
+Box.test(m1$residuals,type="Ljung-Box")
 ```
 The model includes both a seasonal AR-1 and a regular AR-1 component with a drift, which captures the linear component of the data, thereby satisfying the conditions for a model that includes a linear, seasonal, and cyclical component. The residuals satisfy the conditions of a white noise series, suggesting that the model is robust.
 
@@ -151,7 +151,7 @@ checkresiduals(mEU2)
 tsdisplay(mEU2$residuals)
 ```
 
-Despite qualitiative asessment of residuals vs fitted values seeming to gravitate away from zero, the acf and pacf of the residuals demonstrate that the residuals resemble a white noise series, therefore suggesting that the model is robust enough to move forward with.
+Despite qualitiative asessment of residuals vs fitted values seeming to gravitate away from zero, the acf and pacf of the residuals demonstrate that the residuals resemble a white noise series, therefore suggesting that the model is robust enough to move forward with. The Box-test also concludes with enough evidence to fail to reject H-nought, therefore compounding the claim that the residuals are independently distributed.
 
 Multiplicative Decomposition has less significant lags than STL.
 
@@ -177,6 +177,7 @@ plot(y, pch=16,ylab="Recursive Residuals")
 ```
 
 Although the recursive residuals are scattered considerably around zero with significant spread, no pattern seems to exist that would suggest a breaking of any model parameters. 
+The ACF and the PACF suggest that the residuals don't exhibit any serial correlation.
 
 The residuals of EUGDP look to be randomly distributed about a mean of 0, however, there seems to be some outliers at an index of around 15.
 
