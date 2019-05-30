@@ -151,7 +151,9 @@ summary(m1)
 ```
 
 (h) 12-step ahead forecast
-
+```{r}
+plot(forecast(m1) , h=12 ,shadecols="oldstyle", main="Malta Housing Price Index ARIMA Forecast",xlab="Year", ylab ="Index")
+```
 
 <h3>EU GDP Analysis</h3>
 ###(a) Plot of time series, ACF, PACF
@@ -202,6 +204,10 @@ plot(y, pch=16,ylab="Recursive Residuals")
 The residuals look to be randomly distributed about a mean of 0, however, there seems to be some outliers at an index of around 15.
 
 (g) Diagnostic Statistics
+```{r}
+
+```
+
 (h) 12-step ahead forecast
 
 <h3> VAR modeling, forecasting, and causality analysis </h3>
@@ -226,9 +232,12 @@ plot(irf(VAR1, n.ahead=30))
 
 (k) Granger Causality Analysis
 ```{r,}
+#why are we use 8 here? the order should be the the same as that used for the VAR model
 grangertest(HPIts ~ EUGDPts, order = 8)
 grangertest(EUGDPts ~ HPIts, order = 8)
 ```
 
 (l) VAR Model 12 step ahead forecast, comparrison with univariate models 
-
+```{r,}
+plot(predict(VAR1 , n.ahead=12, ci = c(0.80,0.95)), main="Malta Housing Price Index VAR Forecast",xlab="Year", ylab ="Index")
+```
