@@ -1,6 +1,6 @@
 ---
 title: "MaltaVAR"
-author: "Georges Ip" 
+author: "Georges Ip, Vincent Chenneveau" 
 date: "5/28/2019"
 output: html_document
 ---
