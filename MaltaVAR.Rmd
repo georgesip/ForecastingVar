@@ -192,10 +192,13 @@ All other salient diagnostics have been analyzed in the previous components of t
 
 (h) 12-step ahead forecast
 ```{r}
-plot(forecast(m1) , h=12 ,shadecols="oldstyle", main="Malta Housing Price Index ARIMA Forecast",xlab="Year", ylab ="Index")
+plot(forecast(m1 , h=12 ) ,shadecols="oldstyle", main="Malta Housing Price Index ARIMA Forecast",xlab="Year", ylab ="Index")
 ```
 
 (h) 12-step ahead forecast
+```{r}
+plot(forecast(mEU2 , h=12 ),shadecols="oldstyle", main="EU GDP ARIMA Forecast",xlab="Year", ylab ="Index")
+```
 
 <h3> VAR modeling, forecasting, and causality analysis </h3>
 (i) VAR Model and plot discussion
