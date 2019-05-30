@@ -90,7 +90,6 @@ gEUGDPts <- 100*(diff(EUGDPts, lag = 1)/lag(EUGDPts, k=-1))
 <h3>Malta HPI Dataset Analysis</h3>
 
 (a) Plot of time series, ACF, PACF
-
 ```{r message=FALSE, warning=FALSE}
   tsdisplay(HPIts)
  tsdisplay(EUGDPts)
@@ -130,10 +129,10 @@ BIC(mEU1,mEU2,mEU3)
 AIC and BIC both agree that mEU2 is the best model. Hence, we propose an arima(1,1,0) model for EUGDP, we eliminate the seasonal component.
 
 (c) Residuals vs. Fitted values and discussion
-
 ```{r message=FALSE, warning=FALSE}
   plot(m1$fitted,m1$residuals,main="Residuals vs Fitted",xlab="Fitted Values",ylab="Residuals",type="p")
 ```
+
 Analysis shows qualitatively that most of the scattering away from zero tends to occur at smaller values of the HPI near 65-80 and the 90-100 range, stabilizing closer to zero at larger values.
 
 (c) Residuals vs. Fitted values and discussion
@@ -162,6 +161,7 @@ There are no significant lags in the ACF or PACF which suggest we have chosen a 
 plot(efp(m1$res~1, type = "Rec-CUSUM"))
 plot(efp(mEU2$res~1, type = "Rec-CUSUM"))
 ```
+
 Overall, the CUSUM test demonstrates the statistical significant of the model; the recursive cumulative residuals stay within the bounds and don't suggest any long-term trajectory that would create a parameter-breaking scenario.
 
 The EUGDP model seems stable and does not have significant structural breaks.
@@ -182,7 +182,6 @@ The ACF and the PACF suggest that the residuals don't exhibit any serial correla
 The residuals of EUGDP look to be randomly distributed about a mean of 0, however, there seems to be some outliers at an index of around 15.
 
 (g) Diagnostic Statistics
-
 ```{r}
 summary(m1)
 
