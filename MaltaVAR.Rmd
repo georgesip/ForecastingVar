@@ -86,18 +86,25 @@ gHPIts <- 100*(diff(HPIts, lag = 1)/lag(HPIts, k=-1))
 gEUGDPts <- 100*(diff(EUGDPts, lag = 1)/lag(EUGDPts, k=-1))
 ```
 
-<h3>Malta HPI Dataset Analysis</h3>
+<h2>Malta HPI Dataset Analysis</h2>
 
-(a) Plot of time series, ACF, PACF
+##\n\n
+
+### Timeseries visualization
+
 ```{r message=FALSE, warning=FALSE}
-  tsdisplay(HPIts)
- tsdisplay(EUGDPts)
+tsdisplay(HPIts)
+tsdisplay(EUGDPts)
 ```
 <br> Analysis of the correlograms suggests that the series follows an AR-1 process 
 
 The plot of the EUGDP shows that the mean appears to increase over time, however, volatility seems relatively low. The ACF decays relatively quickly to 0, while the PACF only shows a significant spike at a lag of 1. This could be indicative of an AR(1) process.
 
-(b) Model fit (trend, seasonality, cycle) and discussion HPI MALTA
+##\n\n
+
+### Model building
+
+##### House Price Index
 ```{r,}
 stlHPI=stl(HPIts,s.window = "periodic")
 plot(stlHPI,main="STL Decomposition of HPIts")
@@ -109,11 +116,13 @@ m1<-Arima(HPIts,order=c(1,0,0),seasonal = c(1,0,0), include.drift = TRUE)
 plot(HPIts,main="AR1 with SAR1 model with Drift")
 lines(m1$fitted,col='red')
 legend(2006,110,legend=c("Observed","Estimated"),col=c("black","red"))
-Box.test(m1$residuals,type="Ljung-Box")
+Box.test(m1$residuals)
 ```
 The model includes both a seasonal AR-1 and a regular AR-1 component with a drift, which captures the linear component of the data, thereby satisfying the conditions for a model that includes a linear, seasonal, and cyclical component. The residuals satisfy the conditions of a white noise series, suggesting that the model is robust.
 
-(b) Model fit and discussion EUGDP
+##\n\n
+
+##### EU GDP
 ```{r}
 stlEUGDP=stl(EUGDPts,s.window = "periodic")
 plot(stlEUGDP,main="STL Decomposition of EUGDPts")
@@ -127,45 +136,38 @@ BIC(mEU1,mEU2,mEU3)
 ```
 AIC and BIC both agree that mEU2 is the best model. Hence, we propose an arima(1,1,0) model for EUGDP, we eliminate the seasonal component.
 
-(c) Residuals vs. Fitted values and discussion
+##\n\n
+
+### Residual Analysis 
 ```{r message=FALSE, warning=FALSE}
   plot(m1$fitted,m1$residuals,main="Residuals vs Fitted",xlab="Fitted Values",ylab="Residuals",type="p")
 ```
-
 Analysis shows qualitatively that most of the scattering away from zero tends to occur at smaller values of the HPI near 65-80 and the 90-100 range, stabilizing closer to zero at larger values.
 
-(c) Residuals vs. Fitted values and discussion
 ```{r}
 EUresid = resid(mEU2)
 plot(mEU2$fitted, EUresid, xlab = "Fitted Values", ylab = "Residuals")
 ```
 
-
-(d) ACF/PACF analysis for residuals.
 ```{r,}
 tsdisplay(m1$residuals,main="Residual Analysis")
 
 checkresiduals(mEU2)
 tsdisplay(mEU2$residuals)
 ```
-
-Despite qualitiative asessment of residuals vs fitted values seeming to gravitate away from zero, the acf and pacf of the residuals demonstrate that the residuals resemble a white noise series, therefore suggesting that the model is robust enough to move forward with. The Box-test also concludes with enough evidence to fail to reject H-nought, therefore compounding the claim that the residuals are independently distributed.
+Despite qualitiative asessment of residuals vs fitted values seeming to gravitate away from zero, the acf and pacf of the residuals demonstrate that the residuals resemble a white noise series, therefore suggesting that the model is robust enough to move forward with.
 
 Multiplicative Decomposition has less significant lags than STL.
 
 There are no significant lags in the ACF or PACF which suggest we have chosen a good model.
 
-(e) CUMSUM interpretation
 ```{r,}
 plot(efp(m1$res~1, type = "Rec-CUSUM"))
 plot(efp(mEU2$res~1, type = "Rec-CUSUM"))
 ```
-
 Overall, the CUSUM test demonstrates the statistical significant of the model; the recursive cumulative residuals stay within the bounds and don't suggest any long-term trajectory that would create a parameter-breaking scenario.
 
 The EUGDP model seems stable and does not have significant structural breaks.
-
-(f) Recursive Residual Analysis
 
 ```{r}
 y=recresid(m1$res~1)
@@ -176,11 +178,13 @@ plot(y, pch=16,ylab="Recursive Residuals")
 ```
 
 Although the recursive residuals are scattered considerably around zero with significant spread, no pattern seems to exist that would suggest a breaking of any model parameters. 
-The ACF and the PACF suggest that the residuals don't exhibit any serial correlation.
 
 The residuals of EUGDP look to be randomly distributed about a mean of 0, however, there seems to be some outliers at an index of around 15.
 
-(g) Diagnostic Statistics
+##\n\n
+
+### Diagnostic Statistics
+
 ```{r}
 summary(m1)
 
@@ -189,18 +193,18 @@ summary(m2)
 
 All other salient diagnostics have been analyzed in the previous components of this project; the remaining salient components are the ME and Sigma^2 as the Arima function does not return significance values for any of the components. The model is overall significant with a small enough sigma squared, largely in line with the residuals behaving as a white noise series. The standard error for each of the components is also considerably small with the exception of the intercept term, which doesn't factor significantly into the robustness of the model.  
 
-(h) 12-step ahead forecast
+##\n\n
+
+### 12-step ahead forecast
 ```{r}
-plot(forecast(m1 , h=12 ) ,shadecols="oldstyle", main="Malta Housing Price Index ARIMA Forecast",xlab="Year", ylab ="Index")
+plot(forecast(m1) , h=12 ,shadecols="oldstyle", main="Malta Housing Price Index ARIMA Forecast",xlab="Year", ylab ="Index")
 ```
 
-(h) 12-step ahead forecast
-```{r}
-plot(forecast(mEU2 , h=12 ),shadecols="oldstyle", main="EU GDP ARIMA Forecast",xlab="Year", ylab ="Index")
-```
+##\n\n
 
-<h3> VAR modeling, forecasting, and causality analysis </h3>
-(i) VAR Model and plot discussion
+<h2> VAR modeling, forecasting, and causality analysis </h2>
+
+### VAR Model and plot discussion
 ```{r,}
 z=cbind(HPIts,EUGDPts)
 VARm=data.frame(z)
@@ -214,19 +218,25 @@ VAR2=VAR(VARm2,p=11)
 summary(VAR2)
 ```
 
-(j) Impulse Response Interpretation
+##\n\n
+
+### Impulse Response Interpretation
 ```{r,}
 plot(irf(VAR1, n.ahead=30))
 ```
 
-(k) Granger Causality Analysis
+##\n\n
+
+### Granger Causality Analysis
 ```{r,}
 #why are we use 8 here? the order should be the the same as that used for the VAR model
 grangertest(HPIts ~ EUGDPts, order = 8)
 grangertest(EUGDPts ~ HPIts, order = 8)
 ```
 
-(l) VAR Model 12 step ahead forecast, comparrison with univariate models 
+##\n\n
+
+### 12-step ahead forecast, comparrison with univariate models 
 ```{r,}
 plot(predict(VAR1 , n.ahead=12, ci = c(0.80,0.95)), main="Malta Housing Price Index VAR Forecast",xlab="Year", ylab ="Index")
 ```
