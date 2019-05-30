@@ -1,6 +1,6 @@
 ---
 title: "MaltaVAR"
-author: "Georges Ip, Vincent Chenneveau" 
+author: "Vincent C.| Aditya G.| Georges I.| Filipp K." 
 date: "5/28/2019"
 output: html_document
 ---
