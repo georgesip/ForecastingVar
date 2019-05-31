@@ -156,11 +156,11 @@ tsdisplay(mEU2$residuals,main="Residual Analysis of EU GDP model")
 ```
 ##\n\n
 
-Despite qualitiative asessment of residuals vs fitted values seeming to gravitate away from zero, the acf and pacf of the residuals demonstrate that the residuals resemble a white noise series, therefore suggesting that the model is robust enough to move forward with.
+The plot of the residuals against the fitted values show that they are mostly centered around 0 with a few outliers. Despite qualitiative asessment of residuals vs fitted values seeming to gravitate away from zero for some observations, the acf and pacf of the residuals demonstrate that the residuals resemble a white noise series, therefore suggesting that the model is robust enough to move forward with.
 
 Multiplicative Decomposition has less significant lags than STL.
 
-There are no significant lags in the ACF or PACF which suggest we have chosen a good model.
+There are no significant lags in the ACF or PACF which suggest we have chosen good models for both series.
 
 ```{r,}
 plot(efp(m1$res~1, type = "Rec-CUSUM"))
@@ -168,7 +168,7 @@ plot(efp(mEU2$res~1, type = "Rec-CUSUM"))
 ```
 ##\n\n
 
-Overall, the CUSUM test demonstrates the statistical significant of both models as well as theier stability; the recursive cumulative residuals stay within the bounds and don't suggest any long-term trajectory that would create a parameter-breaking scenario. This suggests that our models handles the data well.
+Overall, the CUSUM test demonstrates the statistical significant of both models as well as theier stability; the recursive cumulative residuals stay within the bounds and don't suggest any long-term trajectory that would create a parameter-breaking scenario. This suggests that our models handle the data well.
 
 ```{r}
 y=recresid(m1$res~1)
@@ -280,6 +280,8 @@ Both forecasts show a similar trend over the next 12 periods. However,the VAR mo
 
 ##Conclusion
 Based on our results, we conclude that there is a relationship between EUGDP and HPI of Malta. EUGDP seems to Granger cause HPI, which is inline with our economic intuition. We chose a VAR model with a lag of 1, indicating that HPI will take one quarter to "adjust" to EUGDP. We also compared the VAR forecasts to a univariate ARIMA forecasts. It seems that the VAR model is appropriate in forecasting the short term fluctuations in EUGDP and the HPI of Malta better than the univariate models.
+
+For future work, we could consider growth rates instead. Additionally, we could expand this analysis to other countries similar to Malta that "offer"" EU citizenship. This would help to support our conclusion.  
 
 ##\n\n
 
