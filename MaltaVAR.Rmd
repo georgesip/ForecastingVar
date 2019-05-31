@@ -55,6 +55,7 @@ doCheck("astsa")
 doCheck("vars")
 doCheck("lmtest")
 doCheck("dlnm")
+doCheck("VAR.etp")
 
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -130,13 +131,15 @@ mEU3 <- Arima(EUGDPts, order = c(1,1,0), seasonal = c(1,0,0))
 AIC(mEU1,mEU2,mEU3)
 BIC(mEU1,mEU2,mEU3)
 ```
+##\n\n
+
 AIC and BIC both agree that mEU2 is the best model. Hence, we propose an arima(1,1,0) model for EUGDP, we eliminate the seasonal component.
 
 ##\n\n
 
 ### Residual Analysis 
 ```{r message=FALSE, warning=FALSE}
-  plot(m1$fitted,m1$residuals,main="Residuals vs Fitted",xlab="Fitted Values",ylab="Residuals",type="p")
+  plot(m1$fitted,m1$residuals,main="Residuals vs Fitted",xlab="Fitted Values",ylab="Residuals",type="l")
 ```
 Analysis shows qualitatively that most of the scattering away from zero tends to occur at smaller values of the HPI near 65-80 and the 90-100 range, stabilizing closer to zero at larger values.
 
@@ -151,6 +154,8 @@ tsdisplay(m1$residuals,main="Residual Analysis of House Prices model")
 checkresiduals(mEU2)
 tsdisplay(mEU2$residuals,main="Residual Analysis of EU GDP model")
 ```
+##\n\n
+
 Despite qualitiative asessment of residuals vs fitted values seeming to gravitate away from zero, the acf and pacf of the residuals demonstrate that the residuals resemble a white noise series, therefore suggesting that the model is robust enough to move forward with.
 
 Multiplicative Decomposition has less significant lags than STL.
@@ -161,6 +166,8 @@ There are no significant lags in the ACF or PACF which suggest we have chosen a 
 plot(efp(m1$res~1, type = "Rec-CUSUM"))
 plot(efp(mEU2$res~1, type = "Rec-CUSUM"))
 ```
+##\n\n
+
 Overall, the CUSUM test demonstrates the statistical significant of both models as well as theier stability; the recursive cumulative residuals stay within the bounds and don't suggest any long-term trajectory that would create a parameter-breaking scenario. This suggests that our models handles the data well.
 
 ```{r}
@@ -205,7 +212,7 @@ z=cbind(HPIts,EUGDPts)
 VARm=data.frame(z)
 VARselect(VARm, lag.max = 12)
 VAR.select(VARm, ic="aic", pmax = 1)
-VAR.select(VARm, ic="sc", pmax = 3)
+#VAR.select(VARm, ic="sc", pmax = 3)
 VAR1=VAR(VARm,p=11)
 VAR2=VAR(VARm,p=1)
 summary(VAR1)
@@ -254,18 +261,19 @@ Looking at the results, for model 1 where HPIts is the dependant variable, we se
 ### 12-step ahead forecast, comparison with univariate models 
 ```{r,}
 #VAR forecasts
-plot(predict(VAR1 , n.ahead=12, ci = c(0.80,0.95)), main="Malta Housing Price Index VAR Forecast",xlab="Year", ylab ="Index")
-HPIts.predict = predict(object=VAR1, n.ahead=12)
-plot(HPIts.predict)
+plot(predict(VAR1 , n.ahead=12, ci = c(0.95)), main="VAR Forecast(TOP: HPI, BOTTOM: EUGDP) with 95%CI",xlab="Year", ylab ="Index")
+
 #ARIMA forecasts
 model.1 <- auto.arima(HPIts)
 model.2 <- auto.arima(EUGDPts)
 HPIts.fcast <- forecast(model.1, h=12)
 EUGDP.fcast <- forecast(model.2, h=12)
 par(mfrow = c(2,1))
-plot(HPIts.fcast)
-plot(EUGDP.fcast)
+plot(HPIts.fcast, main="HPI Forecast with ARIMA")
+plot(EUGDP.fcast, main="EUGDP Forecast with ARIMA")
 ```
+##\n\n
+
 Both forecasts show a similar trend over the next 12 periods. However,the VAR model forecasts seem to show short term fluctuations, whereas the arima forecasts are smooth lines. 
 
 ##\n\n
@@ -276,5 +284,11 @@ Based on our results, we conclude that there is a relationship between EUGDP and
 ##\n\n
 
 ##Sources
-GDP data: https://fred.stlouisfed.org/series/CPMNACSCAB1GQEU28
-HPI data: https://sdw.ecb.europa.eu/quickview.do;jsessionid=636A712928C299F1FD6A01976FABDD51?SERIES_KEY=129.RPP.Q.MT.N.TD.00.4.00&start=01-01-2000&end=26-05-2019&submitOptions.x=0&submitOptions.y=0&trans=N
+
+##\n\n
+
+- GDP data: https://fred.stlouisfed.org/series/CPMNACSCAB1GQEU28
+
+##\n\n
+
+- HPI data: https://sdw.ecb.europa.eu/quickview.do;jsessionid=636A712928C299F1FD6A01976FABDD51?SERIES_KEY=129.RPP.Q.MT.N.TD.00.4.00&start=01-01-2000&end=26-05-2019&submitOptions.x=0&submitOptions.y=0&trans=N
