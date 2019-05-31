@@ -204,7 +204,8 @@ plot(forecast((mEU2) , h=12) ,shadecols="oldstyle", main="EUGDP ARIMA Forecast",
 z=cbind(HPIts,EUGDPts)
 VARm=data.frame(z)
 VARselect(VARm, lag.max = 12)
-VAR.select(VARm, ic="aic", pmax = 12)
+VAR.select(VARm, ic="aic", pmax = 1)
+VAR.select(VARm, ic="sc", pmax = 3)
 VAR1=VAR(VARm,p=11)
 VAR2=VAR(VARm,p=1)
 summary(VAR1)
@@ -225,22 +226,55 @@ Looking at the summary statistics for VAR2 instead, we see that the coefficients
 
 ### Impulse Response Interpretation
 ```{r,}
-plot(irf(VAR1, n.ahead=30))
-plot(irf(VAR2, n.ahead=30))
+plot(irf(VAR1, impulse = "HPIts", response = "HPIts", n.ahead=30))
+plot(irf(VAR1, impulse = "HPIts", response = "EUGDPts", n.ahead=30))
+plot(irf(VAR2, impulse = "EUGDPts", response = "HPIts", n.ahead=30))
+plot(irf(VAR2, impulse = "EUGDPts", response = "EUGDPts", n.ahead=30))
 ```
+
+The first plot shows the irf plot of shocks from HPIts on HPIts. There seems to be some seasonality in the shocks, with spikes occuring at regular intervals. The overall effect is stronly positive at the start, before slowly becoming negative.
+
+The second plot shows the irf plot of shocks from HPIts on EUGDPts. The initial shock is small, before becoming strongly negative over time.
+
+The third plot shows the irf plot of shocks from EUGDPts on HPIts. The intial shock is small, before increasing over time.
+
+The fourth plot shows the irf plot of shocks from EUGDPts on EUGDPts. The initial shock is significant, but stays relatively constant. 
 
 ##\n\n
 
 ### Granger Causality Analysis
 ```{r,}
-#why are we use 8 here? the order should be the the same as that used for the VAR model
-grangertest(HPIts ~ EUGDPts, order = 8)
-grangertest(EUGDPts ~ HPIts, order = 8)
+grangertest(HPIts ~ EUGDPts, order = 1)
+grangertest(EUGDPts ~ HPIts, order = 1)
 ```
+Looking at the results, for model 1 where HPIts is the dependant variable, we see a smaller P-value, and hence, greater statistical significance. THerefore, we conclude that EUGDP granger causes HPIts rather than vice versa. This is inline with our economic intuition that a strong or weak EU GDP performance will impact house prices rather than the inverse. 
 
 ##\n\n
 
-### 12-step ahead forecast, comparrison with univariate models 
+### 12-step ahead forecast, comparison with univariate models 
 ```{r,}
+#VAR forecasts
 plot(predict(VAR1 , n.ahead=12, ci = c(0.80,0.95)), main="Malta Housing Price Index VAR Forecast",xlab="Year", ylab ="Index")
+HPIts.predict = predict(object=VAR1, n.ahead=12)
+plot(HPIts.predict)
+#ARIMA forecasts
+model.1 <- auto.arima(HPIts)
+model.2 <- auto.arima(EUGDPts)
+HPIts.fcast <- forecast(model.1, h=12)
+EUGDP.fcast <- forecast(model.2, h=12)
+par(mfrow = c(2,1))
+plot(HPIts.fcast)
+plot(EUGDP.fcast)
 ```
+Both forecasts show a similar trend over the next 12 periods. However,the VAR model forecasts seem to show short term fluctuations, whereas the arima forecasts are smooth lines. 
+
+##\n\n
+
+##Conclusion
+Based on our results, we conclude that there is a relationship between EUGDP and HPI of Malta. EUGDP seems to Granger cause HPI, which is inline with our economic intuition. We chose a VAR model with a lag of 1, indicating that HPI will take one quarter to "adjust" to EUGDP. We also compared the VAR forecasts to a univariate ARIMA forecasts. It seems that the VAR model is appropriate in forecasting the short term fluctuations in EUGDP and the HPI of Malta better than the univariate models.
+
+##\n\n
+
+##Sources
+GDP data: https://fred.stlouisfed.org/series/CPMNACSCAB1GQEU28
+HPI data: https://sdw.ecb.europa.eu/quickview.do;jsessionid=636A712928C299F1FD6A01976FABDD51?SERIES_KEY=129.RPP.Q.MT.N.TD.00.4.00&start=01-01-2000&end=26-05-2019&submitOptions.x=0&submitOptions.y=0&trans=N
