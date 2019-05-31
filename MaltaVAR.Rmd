@@ -62,7 +62,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-  Historically the European block has excelled in labor and capital mobility. Thus making the acquistion of any EU passport quiet attractive. As a result there has developed a market where non-EU citizens can essentialy purchase a EU-citizenship through investments in small countries like Malta. A coursory search of the internet returns hundreds of agencies with the specific purpose of helping you obtain EU citizenship. In this paper we will investigate the connection between house prices in Malta and the EU GDP. Given that EU GDP increases we would predict that the attractiveness of a EU passport would increase and therefore the housing prices in Malta would also increase.
+  Historically the European bloc has excelled in labor and capital mobility. Thus making the acquistion of any EU passport quite attractive. As a result there has developed a market where non-EU citizens can essentialy purchase a EU-citizenship through investments in small countries like Malta. A coursory search of the internet returns hundreds of agencies with the specific purpose of helping you obtain EU citizenship. In this paper we will investigate the connection between house prices in Malta and the EU GDP. Given that EU GDP increases we would predict that the attractiveness of a EU passport would increase and therefore the housing prices in Malta would also increase.
 
 ##\n\n
 
@@ -80,10 +80,6 @@ MaltaHPI <- MaltaHPI[-c(57:60),]
 MaltaHPI <- transform(MaltaHPI, HPI = as.numeric(HPI))
 HPIts <- ts(MaltaHPI$HPI, start=c(2005,1),freq=4)
 EUGDPts <- ts(EUGDP$EUGDP, start=c(2005,1),freq=4)
-
-#Alternatively, try growth
-gHPIts <- 100*(diff(HPIts, lag = 1)/lag(HPIts, k=-1))
-gEUGDPts <- 100*(diff(EUGDPts, lag = 1)/lag(EUGDPts, k=-1))
 ```
 
 <h2>Malta HPI Dataset Analysis</h2>
@@ -150,10 +146,10 @@ plot(mEU2$fitted, EUresid, xlab = "Fitted Values", ylab = "Residuals")
 ```
 
 ```{r,}
-tsdisplay(m1$residuals,main="Residual Analysis")
+tsdisplay(m1$residuals,main="Residual Analysis of House Prices model")
 
 checkresiduals(mEU2)
-tsdisplay(mEU2$residuals)
+tsdisplay(mEU2$residuals,main="Residual Analysis of EU GDP model")
 ```
 Despite qualitiative asessment of residuals vs fitted values seeming to gravitate away from zero, the acf and pacf of the residuals demonstrate that the residuals resemble a white noise series, therefore suggesting that the model is robust enough to move forward with.
 
@@ -165,21 +161,19 @@ There are no significant lags in the ACF or PACF which suggest we have chosen a 
 plot(efp(m1$res~1, type = "Rec-CUSUM"))
 plot(efp(mEU2$res~1, type = "Rec-CUSUM"))
 ```
-Overall, the CUSUM test demonstrates the statistical significant of the model; the recursive cumulative residuals stay within the bounds and don't suggest any long-term trajectory that would create a parameter-breaking scenario.
-
-The EUGDP model seems stable and does not have significant structural breaks.
+Overall, the CUSUM test demonstrates the statistical significant of both models as well as theier stability; the recursive cumulative residuals stay within the bounds and don't suggest any long-term trajectory that would create a parameter-breaking scenario. This suggests that our models handles the data well.
 
 ```{r}
 y=recresid(m1$res~1)
-plot(y, pch=16,ylab="Recursive Residuals")
+plot(y, pch=16,ylab="Recursive Residuals of House Prices Model")
 
-y=recresid(mEU2$res~1)
-plot(y, pch=16,ylab="Recursive Residuals")
+w=recresid(mEU2$res~1)
+plot(w, pch=16,ylab="Recursive Residuals of EU GDP Model")
 ```
 
 Although the recursive residuals are scattered considerably around zero with significant spread, no pattern seems to exist that would suggest a breaking of any model parameters. 
 
-The residuals of EUGDP look to be randomly distributed about a mean of 0, however, there seems to be some outliers at an index of around 15.
+The residuals of EUGDP look to be randomly distributed about a mean of 0, however, there seems to be some outliers at an index of around 15. Nonetheless, as shown by the CUSUM plot above, this does not result in significant breaks in the model.
 
 ##\n\n
 
@@ -188,16 +182,17 @@ The residuals of EUGDP look to be randomly distributed about a mean of 0, howeve
 ```{r}
 summary(m1)
 
-summary(m2)
+summary(mEU2)
 ```
 
-All other salient diagnostics have been analyzed in the previous components of this project; the remaining salient components are the ME and Sigma^2 as the Arima function does not return significance values for any of the components. The model is overall significant with a small enough sigma squared, largely in line with the residuals behaving as a white noise series. The standard error for each of the components is also considerably small with the exception of the intercept term, which doesn't factor significantly into the robustness of the model.  
+All other salient diagnostics have been analyzed in the previous components of this project; the remaining salient components are the ME, Sigma^2 and log likelihood as the Arima function does not return significance values for any of the components. The model is overall significant with a small enough sigma squared, largely in line with the residuals behaving as a white noise series. The standard error for each of the components is also considerably small with the exception of the intercept term, which doesn't factor significantly into the robustness of the model.  
 
 ##\n\n
 
 ### 12-step ahead forecast
 ```{r}
-plot(forecast(m1) , h=12 ,shadecols="oldstyle", main="Malta Housing Price Index ARIMA Forecast",xlab="Year", ylab ="Index")
+plot(forecast((m1), h=12) ,shadecols="oldstyle", main="Malta Housing Price Index ARIMA Forecast",xlab="Year", ylab ="Index")
+plot(forecast((mEU2) , h=12) ,shadecols="oldstyle", main="EUGDP ARIMA Forecast",xlab="Year", ylab ="Index")
 ```
 
 ##\n\n
@@ -208,21 +203,30 @@ plot(forecast(m1) , h=12 ,shadecols="oldstyle", main="Malta Housing Price Index 
 ```{r,}
 z=cbind(HPIts,EUGDPts)
 VARm=data.frame(z)
-VAR1=VAR(VARm,p=3)
+VARselect(VARm, lag.max = 12)
+VAR.select(VARm, ic="aic", pmax = 12)
+VAR1=VAR(VARm,p=11)
+VAR2=VAR(VARm,p=1)
 summary(VAR1)
-#VAR for growth instead
-w = cbind(gHPIts,gEUGDPts)
-VARm2=data.frame(w)
-VARselect(VARm2, lag.max = 12)
-VAR2=VAR(VARm2,p=11)
+summary(VAR2)
+#Look at both time series plots for a sanity check
+par(mfrow=c(2,1))
+plot(HPIts)
+plot(EUGDPts)
+summary(VAR1)
 summary(VAR2)
 ```
+Based on VAR select, AIC selects a model with lag of 9, whereas SC picks a model with only a lag of 1. Looking at the plot of both series, it is not clear which lag is more apparent. 
+
+Looking at the summary statistics for VAR1, we see that when the dependent variable is HPIts, the only statistically significant coefficients are for EUGDPts lag 1, as well as HPIts for lag 3 and 4. The other model where EUGDPts is the dependent variable does not fare well either.
+Looking at the summary statistics for VAR2 instead, we see that the coefficients are more statistically significant across both models. Hence, we go with VAR2. 
 
 ##\n\n
 
 ### Impulse Response Interpretation
 ```{r,}
 plot(irf(VAR1, n.ahead=30))
+plot(irf(VAR2, n.ahead=30))
 ```
 
 ##\n\n
